@@ -1,0 +1,6 @@
+Makefile
+Project.xcconfig
+addons.make
+config.make
+ofxCubeCamera.xcodeproj/
+openFrameworks-Info.plist
