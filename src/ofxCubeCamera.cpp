@@ -16,42 +16,50 @@ void ofxCubeCamera::setup(ofxCubeCamera::projectionTypes type, int w, int h){
     width = w;
     height = h;
     
-    
+    currentType = type;
     switch(type){
         case(DOME):
             renderCount = 5;
             prepareFrameBuffers();
-            renderMesh[BOTTOM].load("domemaster/bottom.ply");
-            renderMesh[FRONT].load("domemaster/front.ply");
-            renderMesh[LEFT].load("domemaster/left.ply");
-            renderMesh[RIGHT].load("domemaster/right.ply");
-            renderMesh[TOP].load("domemaster/top.ply");
-            
-            mask.load("domemaster/mask.png");
+            renderMesh[BOTTOM].load(currentTypeString()+"/bottom.ply");
+            renderMesh[FRONT].load(currentTypeString()+"/front.ply");
+            renderMesh[LEFT].load(currentTypeString()+"/left.ply");
+            renderMesh[RIGHT].load(currentTypeString()+"/right.ply");
+            renderMesh[TOP].load(currentTypeString()+"/top.ply");
             break;
-        case(QUINCUNCIAL):
+        default:
             renderCount = 6;
             prepareFrameBuffers();
-            renderMesh[BOTTOM].load("quincuncial/top.ply");
-            renderMesh[FRONT].load("quincuncial/front.ply");
-            renderMesh[LEFT].load("quincuncial/left.ply");
-            renderMesh[RIGHT].load("quincuncial/right.ply");
-            renderMesh[TOP].load("quincuncial/bottom.ply");
-            renderMesh[BACK].load("quincuncial/back.ply");
-            
-            //create quincuncial meshes and load
-            mask.load("quincuncial/mask.png");
+            renderMesh[BOTTOM].load(currentTypeString()+"/top.ply");
+            renderMesh[FRONT].load(currentTypeString()+"/front.ply");
+            renderMesh[LEFT].load(currentTypeString()+"/left.ply");
+            renderMesh[RIGHT].load(currentTypeString()+"/right.ply");
+            renderMesh[TOP].load(currentTypeString()+"/bottom.ply");
+            renderMesh[BACK].load(currentTypeString()+"/back.ply");
             break;
     }
+    mask.load(currentTypeString()+"/mask.png");
     mask.setUseTexture(true);
     resize(width, height);
     
+}
+
+string ofxCubeCamera::currentTypeString(){
+    switch(currentType){
+        case(DOME): return "dome";
+            break;
+        case(QUINCUNCIAL): return "quincuncial";
+            break;
+        case(MERCATOR): return "mercator";
+            break;
+    }
 }
 
 void ofxCubeCamera::prepareFrameBuffers(){
     for(int i=0; i<renderCount; i++){
         ofCamera c;
         c.setNearClip(.01);
+        c.setParent(*this);
         renderCamera.push_back(c);
         ofFbo f;
         renderFbo.push_back(f);
@@ -80,7 +88,6 @@ void ofxCubeCamera::draw(){
     for (int i=0; i<renderCount; i++){
         renderFbo[i].getTexture().bind();
         ofSetColor(255,255,255);
-        
         ofPushMatrix();
         ofTranslate(-width/2, -height/2, 0);
         ofRotate(90,1,0,0);
@@ -142,13 +149,6 @@ void ofxCubeCamera::resize(int w, int h){
     meshScale = width * meshScaleExt;
     
 }
-
-void ofxCubeCamera::setCameraPosition(float x, float y, float z){
-    for (int i=0; i<renderCount; i++){
-        renderCamera[i].setPosition(x,y,z);
-    }
-}
-
 
 void ofxCubeCamera::setMeshScale(float s){
     meshScaleExt = s;

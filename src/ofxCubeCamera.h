@@ -11,25 +11,28 @@
 
 #include "ofMain.h"
 
-class ofxCubeCamera{
+class ofxCubeCamera : public ofNode{
 public:
     enum projectionTypes{
         DOME,
-        QUINCUNCIAL
+        QUINCUNCIAL,
+        MERCATOR
     };
     ofxCubeCamera();
     void setup(ofxCubeCamera::projectionTypes type,
                int w = ofGetWidth(),
                int h = ofGetHeight());
+    using ofNode::draw;
     void draw();
     void begin(int i);
     void end(int i);
     void resize(int w, int h);
-    void setCameraPosition(float x, float y, float z);
     void setMeshScale(float s);
+    projectionTypes currentType;
+    string currentTypeString();
     
     int renderCount = 0;
-    
+
 private:
     ofRectangle view;
     vector<ofCamera> renderCamera;
@@ -47,7 +50,6 @@ private:
     float meshScale;
     float meshScaleExt;
     
-    ofNode cameraNode;
     
     enum positions{
         BOTTOM,
