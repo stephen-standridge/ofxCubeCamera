@@ -46,7 +46,7 @@ void ofxCubeCamera::setup(ofxCubeCamera::projectionTypes type, int w, int h){
 
 string ofxCubeCamera::currentTypeString(){
     switch(currentType){
-        case(DOME): return "dome";
+        case(DOME): return "dome"   ;
             break;
         case(QUINCUNCIAL): return "quincuncial";
             break;
@@ -69,19 +69,22 @@ void ofxCubeCamera::prepareFrameBuffers(){
 }
 
 void ofxCubeCamera::begin(int i){
+    ofPushMatrix();
     renderFbo[i].begin();
     ofClear(0);
-    renderCamera[i].begin(view);
+    renderCamera[i].begin();
 }
+
 
 void ofxCubeCamera::end(int i){
     renderFbo[i].end();
     renderCamera[i].end();
+    ofPopMatrix();
 }
 
 void ofxCubeCamera::draw(){
-    distortedCamera.enableOrtho();
-    distortedCamera.begin(distortedView);
+    composedCamera.enableOrtho();
+    composedCamera.begin(composedView);
     
     ofEnableNormalizedTexCoords();
     
@@ -101,11 +104,25 @@ void ofxCubeCamera::draw(){
     
     ofDisableNormalizedTexCoords();
     
-    distortedCamera.end();
-    distortedCamera.draw();
+    composedCamera.end();
+    composedCamera.draw();
     
     mask.draw(0,0,width,height);
 }
+
+
+void ofxCubeCamera::setNearClip(float _near) {
+    near = _near;
+    for (ofCamera cam: renderCamera) {
+        cam.setNearClip(near);
+    }
+};
+void ofxCubeCamera::setFarClip(float _far) {
+    far = _far;
+    for (ofCamera cam: renderCamera) {
+        cam.setFarClip(far);
+    }
+};
 
 void ofxCubeCamera::resize(int w, int h){
     
@@ -115,23 +132,41 @@ void ofxCubeCamera::resize(int w, int h){
     view.setWidth(width);
     view.setHeight(height);
     
-    renderCamera[BOTTOM].setOrientation(ofVec3f(-90,0,0));
+    renderCamera[BOTTOM].setNearClip(near);
+    renderCamera[BOTTOM].setFarClip(far);
+    renderCamera[BOTTOM].lookAt(ofVec3f(0,-100,0), ofVec3f(0,0,-1));
+//    renderCamera[BOTTOM].setOrientation(ofVec3f(-90,0,0));
     renderCamera[BOTTOM].setFov(90);
     
-    renderCamera[FRONT].setOrientation(ofVec3f(0,0,0));
+    renderCamera[FRONT].setNearClip(near);
+    renderCamera[FRONT].setFarClip(far);
+    renderCamera[FRONT].lookAt(ofVec3f(0,0,-100), ofVec3f(0,1,0));
+//    renderCamera[FRONT].setOrientation(ofVec3f(0,0,0));
     renderCamera[FRONT].setFov(90);
     
-    renderCamera[LEFT].setOrientation(ofVec3f(0,90,0));
+    renderCamera[LEFT].setNearClip(near);
+    renderCamera[LEFT].setFarClip(far);
+    renderCamera[LEFT].lookAt(ofVec3f(-100,0,0), ofVec3f(0,1,0));
+//    renderCamera[LEFT].setOrientation(ofVec3f(0,90,0));
     renderCamera[LEFT].setFov(90);
     
-    renderCamera[RIGHT].setOrientation(ofVec3f(0, -90, 0));
+    renderCamera[RIGHT].setNearClip(near);
+    renderCamera[RIGHT].setFarClip(far);
+    renderCamera[RIGHT].lookAt(ofVec3f(100, 0, 0), ofVec3f(0,1,0));
+//    renderCamera[RIGHT].setOrientation(ofVec3f(0, -90, 0));
     renderCamera[RIGHT].setFov(90);
     
-    renderCamera[TOP].setOrientation(ofVec3f(90,0,0));
+    renderCamera[TOP].setNearClip(near);
+    renderCamera[TOP].setFarClip(far);
+    renderCamera[TOP].lookAt(ofVec3f(0,100,0), ofVec3f(0,0,1));
+//    renderCamera[TOP].setOrientation(ofVec3f(90,0,0));
     renderCamera[TOP].setFov(90);
     
     if (renderCount == 6){
-        renderCamera[BACK].setOrientation(ofVec3f(0,180,180));
+        renderCamera[BACK].setNearClip(near);
+        renderCamera[BACK].setFarClip(far);
+        renderCamera[BACK].lookAt(ofVec3f(0,0,100), ofVec3f(0,-1,0));
+//        renderCamera[BACK].setOrientation(ofVec3f(0,180,180));
         renderCamera[BACK].setFov(90);
     }
     
@@ -143,9 +178,9 @@ void ofxCubeCamera::resize(int w, int h){
         renderFbo[i].end();
     }
     
-    distortedView.setWidth(width);
-    distortedView.setHeight(height);
-    distortedCamera.setPosition(-width/2, -height/2, 15);
+    composedView.setWidth(width);
+    composedView.setHeight(height);
+    composedCamera.setPosition(-width/2, -height/2, 15);
     meshScale = width * meshScaleExt;
     
 }

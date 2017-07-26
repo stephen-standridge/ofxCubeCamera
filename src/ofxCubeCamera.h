@@ -11,7 +11,7 @@
 
 #include "ofMain.h"
 
-class ofxCubeCamera : public ofNode{
+class ofxCubeCamera : public ofNode {
 public:
     enum projectionTypes{
         DOME,
@@ -28,20 +28,22 @@ public:
     void end(int i);
     void resize(int w, int h);
     void setMeshScale(float s);
+    void setNearClip(float _near);
+    void setFarClip(float _far);
     projectionTypes currentType;
     string currentTypeString();
-    
+    vector<ofCamera> renderCamera;
+
     int renderCount = 0;
 
 private:
     ofRectangle view;
-    vector<ofCamera> renderCamera;
     vector<ofFbo> renderFbo;
     vector<ofVboMesh> renderMesh;
     void prepareFrameBuffers();
     
-    ofCamera distortedCamera;
-    ofRectangle distortedView;
+    ofCamera composedCamera;
+    ofRectangle composedView;
     
     ofImage mask;
     
@@ -49,7 +51,8 @@ private:
     int height;
     float meshScale;
     float meshScaleExt;
-    
+    float near = 0;
+    float far = 0;
     
     enum positions{
         BOTTOM,
